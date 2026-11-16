@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ColorSense AI</title>
+<title>ColorSense AI – تعلّم الألوان بالرموز</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -21,7 +21,6 @@
 html,body{height:100%}
 body{margin:0;font-family:'Tajawal',sans-serif;background:var(--paper);color:var(--ink);
   -webkit-tap-highlight-color:transparent;transition:background .3s,color .3s;}
-[dir="ltr"]{font-family:'Tajawal',system-ui,sans-serif}
 #app{max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--paper);}
 .bar{position:sticky;top:0;top:env(safe-area-inset-top,0px);z-index:5;display:flex;align-items:center;gap:12px;
   padding:16px 18px;background:var(--paper);border-bottom:1px solid var(--line);}
@@ -93,6 +92,20 @@ h2.title{font-size:20px;margin:0 0 4px}
 .section-title{font-size:13px;font-weight:700;color:var(--slate);margin:20px 0 8px}
 .rgbrow{display:flex;gap:8px;margin-top:10px}
 .rgbrow div{flex:1;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;font-size:12px;font-weight:700}
+
+/* ===== NEW: color symbol badge ===== */
+.color-symbol{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:22px;line-height:1;width:40px;height:40px;border-radius:50%;
+  background:var(--paper);border:2px solid var(--line);
+  box-shadow:0 2px 6px rgba(0,0,0,.08);flex-shrink:0;
+}
+.color-symbol.large{font-size:32px;width:56px;height:56px}
+.color-symbol.medium{font-size:26px;width:44px;height:44px}
+.color-symbol.inline{margin-inline-start:8px;vertical-align:middle;width:32px;height:32px;font-size:18px}
+.color-name-wrapper{display:flex;align-items:center;gap:12px}
+.symbol-badge{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;color:var(--slate)}
+.wardrobe-item-symbol{display:flex;align-items:center;gap:8px;margin-top:4px}
 </style>
 </head>
 <body>
@@ -136,7 +149,7 @@ h2.title{font-size:20px;margin:0 0 4px}
     </div>
   </div>
 
-  <!-- CAMERA -->
+  <!-- CAMERA – now with symbol -->
   <div class="screen" id="camera">
     <h2 class="title" data-t="cam_title">تعرف على اللون</h2>
     <div class="preview" id="camPreview">
@@ -153,12 +166,21 @@ h2.title{font-size:20px;margin:0 0 4px}
       <div class="card result">
         <div class="swatch" style="background:#2F6FED"></div>
         <div style="flex:1">
-          <b style="font-size:19px" data-t="color_blue">أزرق</b>
+          <div class="color-name-wrapper">
+            <b style="font-size:19px" data-t="color_blue">أزرق</b>
+            <!-- Symbol badge next to color name -->
+            <span class="color-symbol" aria-label="رمز اللون">💧</span>
+          </div>
           <div class="confidence"><i style="width:94%"></i></div>
           <span class="muted">94% <span data-t="confidence">دقة</span></span>
         </div>
       </div>
       <div class="rgbrow"><div>R 42</div><div>G 92</div><div>B 180</div></div>
+      <!-- Additional symbol explanation line -->
+      <div class="symbol-badge">
+        <span class="color-symbol inline">💧</span>
+        <span data-t="symbol_legend_blue">قطرة الماء = الأزرق</span>
+      </div>
       <div class="ctrl-row">
         <button class="btn primary" onclick="speak('cam_result_speak')" data-t="listen_result">🔊 استمع للنتيجة</button>
       </div>
@@ -166,7 +188,7 @@ h2.title{font-size:20px;margin:0 0 4px}
     </div>
   </div>
 
-  <!-- WARDROBE -->
+  <!-- WARDROBE – with symbols -->
   <div class="screen" id="wardrobe">
     <h2 class="title" data-t="ward_title">خزانتي 👕</h2>
     <button class="btn primary" style="width:100%;margin:12px 0" data-t="ward_add">+ إضافة قطعة</button>
@@ -174,7 +196,7 @@ h2.title{font-size:20px;margin:0 0 4px}
     <div id="harmonyResult"></div>
   </div>
 
-  <!-- FINDER -->
+  <!-- FINDER – with symbol in result -->
   <div class="screen" id="finder">
     <h2 class="title" data-t="find_title">🔎 ابحث عن لون</h2>
     <button class="mic" onclick="startFinder()">🎙️</button>
@@ -184,7 +206,10 @@ h2.title{font-size:20px;margin:0 0 4px}
     </div>
     <button class="btn primary" style="width:100%;margin-top:16px" onclick="startFinder()" data-t="find_start">ابدأ البحث</button>
     <div id="findResult" style="display:none;text-align:center;margin-top:16px">
-      <div class="badge ok" style="display:inline-flex" data-t="find_found">🔵 تم العثور على اللون الأزرق</div>
+      <div class="badge ok" style="display:inline-flex;align-items:center;gap:8px">
+        <span class="color-symbol inline">💧</span>
+        <span data-t="find_found">🔵 تم العثور على اللون الأزرق</span>
+      </div>
     </div>
   </div>
 
@@ -230,8 +255,10 @@ h2.title{font-size:20px;margin:0 0 4px}
 </div>
 
 <script>
+/* ================= LANGUAGE DICTIONARY with SYMBOL support ================= */
 const T = {
-  ar:{tagline:"بص بعين مختلفة",
+  ar:{
+    tagline:"بص بعين مختلفة",
     h_color:"تعرف على اللون",h_color_s:"وجّه الكاميرا واعرف اللون",
     h_wardrobe:"نسّق ملابسك",h_wardrobe_s:"حلّل ألوان ملابسك",
     h_finder:"ابحث عن لون",h_finder_s:"دوّر على لون معيّن",
@@ -245,9 +272,20 @@ const T = {
     gl_msg1:"أمامك جسم أزرق.",gl_msg2:"تم العثور على اللون المطلوب.",voice:"صوت",vibration:"اهتزاز",beep:"صفارة",
     phone_mode:"وضع الهاتف",phone_mode_s:"يمكن وضع الهاتف في الجيب واستخدام الأوامر الصوتية والاهتزاز.",
     set_title:"الإعدادات",set_lang:"اللغة",set_enhance:"تحسين الألوان",set_sound:"الصوت",set_vibe:"الاهتزاز",set_dark:"الوضع الداكن",
-    items:["قميص أزرق","بنطلون أسود","تيشيرت أبيض","حذاء رمادي"], titles:{home:"ColorSense AI",camera:"تعرف على اللون",wardrobe:"خزانتي",finder:"ابحث عن لون",glasses:"بدون استخدام اليدين",settings:"الإعدادات"}
+    items:["قميص أزرق","بنطلون أسود","تيشيرت أبيض","حذاء رمادي"],
+    titles:{home:"ColorSense AI",camera:"تعرف على اللون",wardrobe:"خزانتي",finder:"ابحث عن لون",glasses:"بدون استخدام اليدين",settings:"الإعدادات"},
+    /* Symbol legend */
+    symbol_legend_blue:"💧 قطرة الماء = الأزرق",
+    symbol_legend_red:"❤️ القلب = الأحمر",
+    symbol_legend_green:"🍃 ورقة الشجر = الأخضر",
+    symbol_legend_yellow:"☀️ الشمس = الأصفر",
+    symbol_legend_orange:"🍊 البرتقالة = البرتقالي",
+    symbol_legend_purple:"🌸 الزهرة = البنفسجي",
+    symbol_legend_black:"⚫ نقطة سوداء = الأسود",
+    symbol_legend_white:"⚪ نقطة بيضاء = الأبيض"
   },
-  en:{tagline:"See it your way",
+  en:{
+    tagline:"See it your way",
     h_color:"Identify a color",h_color_s:"Point the camera and find out",
     h_wardrobe:"Match your outfit",h_wardrobe_s:"Check your clothing colors",
     h_finder:"Find a color",h_finder_s:"Search for a specific color",
@@ -261,11 +299,53 @@ const T = {
     gl_msg1:"There's a blue object ahead.",gl_msg2:"The color you wanted was found.",voice:"Voice",vibration:"Vibration",beep:"Beep",
     phone_mode:"Pocket mode",phone_mode_s:"Keep your phone in your pocket and use voice commands and vibration.",
     set_title:"Settings",set_lang:"Language",set_enhance:"Color enhancement",set_sound:"Sound",set_vibe:"Vibration",set_dark:"Dark mode",
-    items:["Blue shirt","Black pants","White t-shirt","Grey shoes"], titles:{home:"ColorSense AI",camera:"Identify a color",wardrobe:"My wardrobe",finder:"Find a color",glasses:"Hands-free",settings:"Settings"}
+    items:["Blue shirt","Black pants","White t-shirt","Grey shoes"],
+    titles:{home:"ColorSense AI",camera:"Identify a color",wardrobe:"My wardrobe",finder:"Find a color",glasses:"Hands-free",settings:"Settings"},
+    symbol_legend_blue:"💧 Water drop = Blue",
+    symbol_legend_red:"❤️ Heart = Red",
+    symbol_legend_green:"🍃 Leaf = Green",
+    symbol_legend_yellow:"☀️ Sun = Yellow",
+    symbol_legend_orange:"🍊 Orange = Orange",
+    symbol_legend_purple:"🌸 Flower = Purple",
+    symbol_legend_black:"⚫ Black dot = Black",
+    symbol_legend_white:"⚪ White dot = White"
   }
 };
+
+/* ================= COLOR SYMBOL MAPPING ================= */
+const colorSymbols = {
+  blue:  { emoji:"💧", ar:"قطرة الماء = الأزرق", en:"Water drop = Blue" },
+  red:   { emoji:"❤️", ar:"القلب = الأحمر", en:"Heart = Red" },
+  green: { emoji:"🍃", ar:"ورقة الشجر = الأخضر", en:"Leaf = Green" },
+  yellow:{ emoji:"☀️", ar:"الشمس = الأصفر", en:"Sun = Yellow" },
+  orange:{ emoji:"🍊", ar:"البرتقالة = البرتقالي", en:"Orange = Orange" },
+  purple:{ emoji:"🌸", ar:"الزهرة = البنفسجي", en:"Flower = Purple" },
+  black: { emoji:"⚫", ar:"نقطة سوداء = الأسود", en:"Black dot = Black" },
+  white: { emoji:"⚪", ar:"نقطة بيضاء = الأبيض", en:"White dot = White" }
+};
+
+/* Helper to get symbol by hex or name */
+function getSymbolForColor(colorName) {
+  const map = {
+    "أزرق":"blue", "blue":"blue",
+    "أحمر":"red", "red":"red",
+    "أخضر":"green", "green":"green",
+    "أصفر":"yellow", "yellow":"yellow",
+    "برتقالي":"orange", "orange":"orange",
+    "بنفسجي":"purple", "purple":"purple",
+    "أسود":"black", "black":"black",
+    "أبيض":"white", "white":"white"
+  };
+  const key = map[colorName] || 'blue';
+  return colorSymbols[key];
+}
+
+/* ================= APP LOGIC ================= */
 let lang = 'ar';
 const itemColors = ["#2F6FED","#1A1D22","#F4F6F8","#8A8F98"];
+/* Map wardrobe items to color names for symbols */
+const itemColorNames = ["أزرق","أسود","أبيض","رمادي"];
+const itemSymbols = ["💧","⚫","⚪","⚪"]; // grey uses white symbol as fallback, but we can adjust
 let selected = new Set();
 
 function applyLang(){
@@ -281,6 +361,18 @@ function applyLang(){
   renderWardrobe();
   const active = document.querySelector('.screen.active').id;
   document.getElementById('barTitle').textContent = dict.titles[active];
+
+  /* Update symbol legend in camera result if visible */
+  const legendEl = document.querySelector('.symbol-badge [data-t="symbol_legend_blue"]');
+  if(legendEl) {
+    legendEl.textContent = lang === 'ar' ? colorSymbols.blue.ar : colorSymbols.blue.en;
+  }
+
+  /* Update finder result symbol text if needed */
+  const findSymbolSpan = document.querySelector('#findResult .badge .color-symbol');
+  if(findSymbolSpan) {
+    // Keep emoji, update aria label or surrounding text
+  }
 }
 function setLang(l){ lang=l; applyLang(); }
 
@@ -303,6 +395,11 @@ function scanColor(){
     ring.style.display='none';
     ph.textContent = T[lang].cam_placeholder;
     result.style.display='block';
+    /* Update symbol legend dynamically */
+    const legendEl = document.querySelector('.symbol-badge [data-t="symbol_legend_blue"]');
+    if(legendEl) {
+      legendEl.textContent = lang === 'ar' ? colorSymbols.blue.ar : colorSymbols.blue.en;
+    }
   }, 1400);
 }
 function toggleEnhance(){ document.getElementById('camPreview').classList.toggle('enhanced'); }
@@ -316,7 +413,27 @@ function renderWardrobe(){
     const d = document.createElement('div');
     d.className = 'item-card' + (selected.has(i)?' sel':'');
     d.onclick = ()=>{ selected.has(i)?selected.delete(i):selected.add(i); checkHarmony(); renderWardrobe(); };
-    d.innerHTML = `<div class="sw" style="background:${itemColors[i]}${i===2?';border:1px solid var(--line)':''}"></div><b>${name}</b>`;
+
+    /* Use symbol based on item index or color name */
+    let symbolEmoji = itemSymbols[i] || "🎨";
+    let colorName = itemColorNames[i] || "";
+    if (lang === 'en') {
+      const enNames = ["blue","black","white","grey"];
+      colorName = enNames[i] || "";
+    }
+    // For grey, use white dot symbol as fallback
+    if (i === 3) symbolEmoji = "⚪";
+
+    d.innerHTML = `
+      <div class="sw" style="background:${itemColors[i]}${i===2?';border:1px solid var(--line)':''}"></div>
+      <div style="flex:1">
+        <b>${name}</b>
+        <div class="wardrobe-item-symbol">
+          <span class="color-symbol" style="width:28px;height:28px;font-size:16px">${symbolEmoji}</span>
+          <span style="font-size:12px;color:var(--slate)">${colorName}</span>
+        </div>
+      </div>
+    `;
     grid.appendChild(d);
   });
   checkHarmony();
@@ -324,9 +441,8 @@ function renderWardrobe(){
 function checkHarmony(){
   const box = document.getElementById('harmonyResult');
   if(selected.size < 2){ box.innerHTML=''; return; }
-  const ok = !(selected.has(1) && selected.has(2) === false && selected.size===2 && false); // simple mock rule
   const good = selected.size <= 3 && !(selected.has(0) && selected.has(3) && selected.size===2);
-  box.innerHTML = `<div class="section-title" data-t="cam_detected" style="margin-top:20px">${lang==='ar'?'تنسيق الألوان':'Color match'}</div>
+  box.innerHTML = `<div class="section-title" style="margin-top:20px">${lang==='ar'?'تنسيق الألوان':'Color match'}</div>
   <div class="badge ${good?'ok':'warn'}">${good ? T[lang].harmony_ok : T[lang].harmony_warn}</div>
   <div style="display:flex;gap:8px;margin-top:10px">${[...selected].map(i=>`<div class="swatch" style="width:34px;height:34px;background:${itemColors[i]}"></div>`).join('')}</div>`;
 }
@@ -349,11 +465,22 @@ function toggleDark(){
 }
 function speak(key){
   if('speechSynthesis' in window){
-    const u = new SpeechSynthesisUtterance(T[lang][key] || T[lang].color_blue);
+    let text = T[lang][key] || T[lang].color_blue;
+    // If key is cam_result_speak, use the color + symbol description
+    if(key === 'cam_result_speak') {
+      const colorName = lang === 'ar' ? 'أزرق' : 'Blue';
+      const symbolDesc = lang === 'ar' ? 'قطرة الماء' : 'water drop';
+      text = lang === 'ar' 
+        ? `اللون المكتشف هو أزرق. رمزه قطرة الماء.` 
+        : `The detected color is blue. Its symbol is a water drop.`;
+    }
+    const u = new SpeechSynthesisUtterance(text);
     u.lang = lang==='ar' ? 'ar-SA' : 'en-US';
     speechSynthesis.speak(u);
   }
 }
+
+/* Initialize */
 applyLang();
 </script>
 </body>
