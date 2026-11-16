@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ColorSense AI – تعلّم الألوان بالرموز</title>
+<title>ColorSense AI – كاميرا حقيقية</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -11,8 +11,6 @@
   --ink:#14171C; --paper:#F7F8FA; --card:#FFFFFF;
   --blue:#2F6FED; --blue-d:#1F4FC0; --amber:#F2A93B; --teal:#159C86;
   --slate:#5B6472; --line:#E5E8EE; --danger:#E0562F;
-  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
-  box-sizing:border-box;
 }
 :root[data-theme="dark"]{
   --ink:#F2F4F7; --paper:#0E1117; --card:#171B22; --line:#262B33; --slate:#96A0AF;
@@ -45,12 +43,12 @@ body{margin:0;font-family:'Tajawal',sans-serif;background:var(--paper);color:var
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px;}
 .offline{display:flex;gap:10px;align-items:flex-start;border-color:var(--teal);}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);margin-top:6px;flex-shrink:0}
-.preview{aspect-ratio:3/4;border-radius:20px;background:linear-gradient(160deg,#20242c,#11131a);
-  display:flex;align-items:center;justify-content:center;color:#8b93a3;font-size:13px;position:relative;overflow:hidden;
-  border:1px solid var(--line);}
-.preview.enhanced{filter:saturate(1.6) contrast(1.15)}
-.scan-ring{width:120px;height:120px;border-radius:50%;border:3px solid #ffffff33;border-top-color:var(--amber);
-  animation:spin 1s linear infinite;}
+
+/* Update preview to hold video */
+.preview{aspect-ratio:3/4;border-radius:20px;background:#000;display:flex;align-items:center;justify-content:center;color:#8b93a3;font-size:13px;position:relative;overflow:hidden;border:1px solid var(--line);}
+#cameraStream{width:100%;height:100%;object-fit:cover;display:none;}
+
+.scan-ring{width:120px;height:120px;border-radius:50%;border:3px solid #ffffff33;border-top-color:var(--amber);animation:spin 1s linear infinite;z-index:2;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .ctrl-row{display:flex;gap:10px;margin-top:14px}
 .btn{flex:1;padding:14px;border-radius:14px;border:none;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;}
@@ -61,21 +59,16 @@ body{margin:0;font-family:'Tajawal',sans-serif;background:var(--paper);color:var
 .swatch{width:64px;height:64px;border-radius:50%;flex-shrink:0;border:3px solid var(--card);box-shadow:0 0 0 1px var(--line)}
 .confidence{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:6px}
 .confidence i{display:block;height:100%;background:var(--teal)}
-.item-card{display:flex;align-items:center;gap:12px;background:var(--card);border:2px solid var(--line);
-  border-radius:16px;padding:12px;cursor:pointer;}
+.item-card{display:flex;align-items:center;gap:12px;background:var(--card);border:2px solid var(--line);border-radius:16px;padding:12px;cursor:pointer;}
 .item-card.sel{border-color:var(--blue)}
 .item-card .sw{width:38px;height:38px;border-radius:10px;flex-shrink:0}
 .badge{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border-radius:12px;font-weight:700;font-size:13.5px;margin-top:14px}
 .badge.ok{background:#159C8622;color:var(--teal)}
 .badge.warn{background:#F2A93B26;color:#B8790F}
-.mic{width:110px;height:110px;border-radius:50%;background:var(--blue);color:#fff;font-size:40px;border:none;
-  display:flex;align-items:center;justify-content:center;margin:26px auto;cursor:pointer;box-shadow:0 8px 24px #2F6FED44;}
-.glasses-card{background:linear-gradient(145deg,var(--card),var(--paper));border:1px solid var(--line);
-  border-radius:20px;padding:22px;text-align:center;}
-.status-pill{display:inline-flex;align-items:center;gap:8px;background:#159C8622;color:var(--teal);
-  padding:6px 14px;border-radius:20px;font-weight:700;font-size:13px;margin-top:10px}
-.voice-msg{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px;
-  font-size:14px;display:flex;gap:10px;align-items:flex-start}
+.mic{width:110px;height:110px;border-radius:50%;background:var(--blue);color:#fff;font-size:40px;border:none;display:flex;align-items:center;justify-content:center;margin:26px auto;cursor:pointer;box-shadow:0 8px 24px #2F6FED44;}
+.glasses-card{background:linear-gradient(145deg,var(--card),var(--paper));border:1px solid var(--line);border-radius:20px;padding:22px;text-align:center;}
+.status-pill{display:inline-flex;align-items:center;gap:8px;background:#159C8622;color:var(--teal);padding:6px 14px;border-radius:20px;font-weight:700;font-size:13px;margin-top:10px}
+.voice-msg{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px;font-size:14px;display:flex;gap:10px;align-items:flex-start}
 .icon-row{display:flex;gap:10px;margin-top:16px}
 .icon-row .iconbtn{flex:1;height:52px;border-radius:14px;font-size:20px;flex-direction:column;gap:2px;}
 .setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 4px;border-bottom:1px solid var(--line)}
@@ -93,19 +86,13 @@ h2.title{font-size:20px;margin:0 0 4px}
 .rgbrow{display:flex;gap:8px;margin-top:10px}
 .rgbrow div{flex:1;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;font-size:12px;font-weight:700}
 
-/* ===== NEW: color symbol badge ===== */
-.color-symbol{
-  display:inline-flex;align-items:center;justify-content:center;
-  font-size:22px;line-height:1;width:40px;height:40px;border-radius:50%;
-  background:var(--paper);border:2px solid var(--line);
-  box-shadow:0 2px 6px rgba(0,0,0,.08);flex-shrink:0;
-}
-.color-symbol.large{font-size:32px;width:56px;height:56px}
-.color-symbol.medium{font-size:26px;width:44px;height:44px}
-.color-symbol.inline{margin-inline-start:8px;vertical-align:middle;width:32px;height:32px;font-size:18px}
-.color-name-wrapper{display:flex;align-items:center;gap:12px}
-.symbol-badge{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;color:var(--slate)}
-.wardrobe-item-symbol{display:flex;align-items:center;gap:8px;margin-top:4px}
+/* Symbols */
+.color-symbol{display:inline-flex;align-items:center;justify-content:center;font-size:22px;line-height:1;width:40px;height:40px;border-radius:50%;background:var(--paper);border:2px solid var(--line);box-shadow:0 2px 6px rgba(0,0,0,.08);flex-shrink:0;}
+.color-symbol.large{font-size:32px;width:56px;height:56px;}
+.color-symbol.medium{font-size:26px;width:44px;height:44px;}
+.color-symbol.inline{margin-inline-start:8px;vertical-align:middle;width:32px;height:32px;font-size:18px;}
+.color-name-wrapper{display:flex;align-items:center;gap:12px;}
+.symbol-badge{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;color:var(--slate);}
 </style>
 </head>
 <body>
@@ -149,12 +136,14 @@ h2.title{font-size:20px;margin:0 0 4px}
     </div>
   </div>
 
-  <!-- CAMERA – now with symbol -->
+  <!-- CAMERA -->
   <div class="screen" id="camera">
     <h2 class="title" data-t="cam_title">تعرف على اللون</h2>
     <div class="preview" id="camPreview">
-      <span id="camPlaceholder" data-t="cam_placeholder">معاينة الكاميرا</span>
-      <div class="scan-ring" id="scanRing" style="display:none;position:absolute"></div>
+      <!-- Video element added here -->
+      <video id="cameraStream" autoplay playsinline muted></video>
+      <span id="camPlaceholder" data-t="cam_placeholder" style="position:absolute; z-index:1;">جاري تشغيل الكاميرا...</span>
+      <div class="scan-ring" id="scanRing" style="display:none;position:absolute; z-index:2;"></div>
     </div>
     <div class="ctrl-row">
       <button class="btn primary" id="scanBtn" onclick="scanColor()" data-t="cam_scan">📷 تحليل اللون</button>
@@ -168,7 +157,6 @@ h2.title{font-size:20px;margin:0 0 4px}
         <div style="flex:1">
           <div class="color-name-wrapper">
             <b style="font-size:19px" data-t="color_blue">أزرق</b>
-            <!-- Symbol badge next to color name -->
             <span class="color-symbol" aria-label="رمز اللون">💧</span>
           </div>
           <div class="confidence"><i style="width:94%"></i></div>
@@ -176,7 +164,6 @@ h2.title{font-size:20px;margin:0 0 4px}
         </div>
       </div>
       <div class="rgbrow"><div>R 42</div><div>G 92</div><div>B 180</div></div>
-      <!-- Additional symbol explanation line -->
       <div class="symbol-badge">
         <span class="color-symbol inline">💧</span>
         <span data-t="symbol_legend_blue">قطرة الماء = الأزرق</span>
@@ -188,7 +175,7 @@ h2.title{font-size:20px;margin:0 0 4px}
     </div>
   </div>
 
-  <!-- WARDROBE – with symbols -->
+  <!-- WARDROBE -->
   <div class="screen" id="wardrobe">
     <h2 class="title" data-t="ward_title">خزانتي 👕</h2>
     <button class="btn primary" style="width:100%;margin:12px 0" data-t="ward_add">+ إضافة قطعة</button>
@@ -196,7 +183,7 @@ h2.title{font-size:20px;margin:0 0 4px}
     <div id="harmonyResult"></div>
   </div>
 
-  <!-- FINDER – with symbol in result -->
+  <!-- FINDER -->
   <div class="screen" id="finder">
     <h2 class="title" data-t="find_title">🔎 ابحث عن لون</h2>
     <button class="mic" onclick="startFinder()">🎙️</button>
@@ -255,10 +242,8 @@ h2.title{font-size:20px;margin:0 0 4px}
 </div>
 
 <script>
-/* ================= LANGUAGE DICTIONARY with SYMBOL support ================= */
 const T = {
-  ar:{
-    tagline:"بص بعين مختلفة",
+  ar:{tagline:"بص بعين مختلفة",
     h_color:"تعرف على اللون",h_color_s:"وجّه الكاميرا واعرف اللون",
     h_wardrobe:"نسّق ملابسك",h_wardrobe_s:"حلّل ألوان ملابسك",
     h_finder:"ابحث عن لون",h_finder_s:"دوّر على لون معيّن",
@@ -274,18 +259,9 @@ const T = {
     set_title:"الإعدادات",set_lang:"اللغة",set_enhance:"تحسين الألوان",set_sound:"الصوت",set_vibe:"الاهتزاز",set_dark:"الوضع الداكن",
     items:["قميص أزرق","بنطلون أسود","تيشيرت أبيض","حذاء رمادي"],
     titles:{home:"ColorSense AI",camera:"تعرف على اللون",wardrobe:"خزانتي",finder:"ابحث عن لون",glasses:"بدون استخدام اليدين",settings:"الإعدادات"},
-    /* Symbol legend */
-    symbol_legend_blue:"💧 قطرة الماء = الأزرق",
-    symbol_legend_red:"❤️ القلب = الأحمر",
-    symbol_legend_green:"🍃 ورقة الشجر = الأخضر",
-    symbol_legend_yellow:"☀️ الشمس = الأصفر",
-    symbol_legend_orange:"🍊 البرتقالة = البرتقالي",
-    symbol_legend_purple:"🌸 الزهرة = البنفسجي",
-    symbol_legend_black:"⚫ نقطة سوداء = الأسود",
-    symbol_legend_white:"⚪ نقطة بيضاء = الأبيض"
+    symbol_legend_blue:"💧 قطرة الماء = الأزرق"
   },
-  en:{
-    tagline:"See it your way",
+  en:{tagline:"See it your way",
     h_color:"Identify a color",h_color_s:"Point the camera and find out",
     h_wardrobe:"Match your outfit",h_wardrobe_s:"Check your clothing colors",
     h_finder:"Find a color",h_finder_s:"Search for a specific color",
@@ -301,52 +277,19 @@ const T = {
     set_title:"Settings",set_lang:"Language",set_enhance:"Color enhancement",set_sound:"Sound",set_vibe:"Vibration",set_dark:"Dark mode",
     items:["Blue shirt","Black pants","White t-shirt","Grey shoes"],
     titles:{home:"ColorSense AI",camera:"Identify a color",wardrobe:"My wardrobe",finder:"Find a color",glasses:"Hands-free",settings:"Settings"},
-    symbol_legend_blue:"💧 Water drop = Blue",
-    symbol_legend_red:"❤️ Heart = Red",
-    symbol_legend_green:"🍃 Leaf = Green",
-    symbol_legend_yellow:"☀️ Sun = Yellow",
-    symbol_legend_orange:"🍊 Orange = Orange",
-    symbol_legend_purple:"🌸 Flower = Purple",
-    symbol_legend_black:"⚫ Black dot = Black",
-    symbol_legend_white:"⚪ White dot = White"
+    symbol_legend_blue:"💧 Water drop = Blue"
   }
 };
 
-/* ================= COLOR SYMBOL MAPPING ================= */
-const colorSymbols = {
-  blue:  { emoji:"💧", ar:"قطرة الماء = الأزرق", en:"Water drop = Blue" },
-  red:   { emoji:"❤️", ar:"القلب = الأحمر", en:"Heart = Red" },
-  green: { emoji:"🍃", ar:"ورقة الشجر = الأخضر", en:"Leaf = Green" },
-  yellow:{ emoji:"☀️", ar:"الشمس = الأصفر", en:"Sun = Yellow" },
-  orange:{ emoji:"🍊", ar:"البرتقالة = البرتقالي", en:"Orange = Orange" },
-  purple:{ emoji:"🌸", ar:"الزهرة = البنفسجي", en:"Flower = Purple" },
-  black: { emoji:"⚫", ar:"نقطة سوداء = الأسود", en:"Black dot = Black" },
-  white: { emoji:"⚪", ar:"نقطة بيضاء = الأبيض", en:"White dot = White" }
-};
-
-/* Helper to get symbol by hex or name */
-function getSymbolForColor(colorName) {
-  const map = {
-    "أزرق":"blue", "blue":"blue",
-    "أحمر":"red", "red":"red",
-    "أخضر":"green", "green":"green",
-    "أصفر":"yellow", "yellow":"yellow",
-    "برتقالي":"orange", "orange":"orange",
-    "بنفسجي":"purple", "purple":"purple",
-    "أسود":"black", "black":"black",
-    "أبيض":"white", "white":"white"
-  };
-  const key = map[colorName] || 'blue';
-  return colorSymbols[key];
-}
-
-/* ================= APP LOGIC ================= */
 let lang = 'ar';
 const itemColors = ["#2F6FED","#1A1D22","#F4F6F8","#8A8F98"];
-/* Map wardrobe items to color names for symbols */
 const itemColorNames = ["أزرق","أسود","أبيض","رمادي"];
-const itemSymbols = ["💧","⚫","⚪","⚪"]; // grey uses white symbol as fallback, but we can adjust
+const itemSymbols = ["💧","⚫","⚪","⚪"]; 
 let selected = new Set();
+
+/* Camera state */
+let videoStream = null;
+const videoElement = document.getElementById('cameraStream');
 
 function applyLang(){
   const dict = T[lang];
@@ -361,17 +304,9 @@ function applyLang(){
   renderWardrobe();
   const active = document.querySelector('.screen.active').id;
   document.getElementById('barTitle').textContent = dict.titles[active];
-
-  /* Update symbol legend in camera result if visible */
-  const legendEl = document.querySelector('.symbol-badge [data-t="symbol_legend_blue"]');
-  if(legendEl) {
-    legendEl.textContent = lang === 'ar' ? colorSymbols.blue.ar : colorSymbols.blue.en;
-  }
-
-  /* Update finder result symbol text if needed */
-  const findSymbolSpan = document.querySelector('#findResult .badge .color-symbol');
-  if(findSymbolSpan) {
-    // Keep emoji, update aria label or surrounding text
+  
+  if (lang === 'en' && document.getElementById('camPlaceholder').textContent === "جاري تشغيل الكاميرا...") {
+      document.getElementById('camPlaceholder').textContent = "Starting camera...";
   }
 }
 function setLang(l){ lang=l; applyLang(); }
@@ -381,29 +316,70 @@ function show(id){
   document.getElementById(id).classList.add('active');
   document.getElementById('backBtn').style.display = id==='home' ? 'none':'flex';
   document.getElementById('barTitle').textContent = T[lang].titles[id];
+  
+  // Start camera when entering camera screen
+  if (id === 'camera') {
+    startCamera();
+  } else {
+    stopCamera();
+  }
 }
 function goHome(){ show('home'); }
 
+/* ================= REAL CAMERA LOGIC ================= */
+async function startCamera() {
+  const ph = document.getElementById('camPlaceholder');
+  try {
+    // Request back camera
+    videoStream = await navigator.mediaDevices.getUserMedia({ 
+      video: { facingMode: 'environment' } 
+    });
+    videoElement.srcObject = videoStream;
+    videoElement.style.display = 'block';
+    ph.style.display = 'none'; // Hide placeholder text
+  } catch (err) {
+    console.error("Camera error:", err);
+    ph.textContent = "لم نتمكن من الوصول للكاميرا. تأكد من إعطاء الإذن.";
+    videoElement.style.display = 'none';
+  }
+}
+
+function stopCamera() {
+  if (videoStream) {
+    videoStream.getTracks().forEach(track => track.stop());
+    videoStream = null;
+    videoElement.srcObject = null;
+    videoElement.style.display = 'none';
+    document.getElementById('camPlaceholder').style.display = 'block';
+    document.getElementById('camPlaceholder').textContent = T[lang].cam_placeholder;
+  }
+}
+
 function scanColor(){
+  if (!videoStream) {
+    alert(lang === 'ar' ? 'الكاميرا غير مفعلة.' : 'Camera is not active.');
+    return;
+  }
+  
   const ph = document.getElementById('camPlaceholder');
   const ring = document.getElementById('scanRing');
   const result = document.getElementById('camResult');
-  ph.textContent = T[lang].cam_scanning;
+  
+  // Show scanning effect
   ring.style.display='block';
   result.style.display='none';
+  
+  // Simulate analysis delay
   setTimeout(()=>{
     ring.style.display='none';
-    ph.textContent = T[lang].cam_placeholder;
     result.style.display='block';
-    /* Update symbol legend dynamically */
-    const legendEl = document.querySelector('.symbol-badge [data-t="symbol_legend_blue"]');
-    if(legendEl) {
-      legendEl.textContent = lang === 'ar' ? colorSymbols.blue.ar : colorSymbols.blue.en;
-    }
-  }, 1400);
+  }, 1500);
 }
+
 function toggleEnhance(){ document.getElementById('camPreview').classList.toggle('enhanced'); }
-function toggleFlash(btn){ btn.style.background = btn.style.background ? '' : 'var(--amber)'; }
+function toggleFlash(btn){ 
+  btn.style.background = btn.style.background ? '' : 'var(--amber)'; 
+}
 
 function renderWardrobe(){
   const dict = T[lang];
@@ -413,22 +389,20 @@ function renderWardrobe(){
     const d = document.createElement('div');
     d.className = 'item-card' + (selected.has(i)?' sel':'');
     d.onclick = ()=>{ selected.has(i)?selected.delete(i):selected.add(i); checkHarmony(); renderWardrobe(); };
-
-    /* Use symbol based on item index or color name */
+    
     let symbolEmoji = itemSymbols[i] || "🎨";
     let colorName = itemColorNames[i] || "";
     if (lang === 'en') {
       const enNames = ["blue","black","white","grey"];
       colorName = enNames[i] || "";
     }
-    // For grey, use white dot symbol as fallback
-    if (i === 3) symbolEmoji = "⚪";
+    if (i === 3) symbolEmoji = "⚪"; // Fallback for grey
 
     d.innerHTML = `
       <div class="sw" style="background:${itemColors[i]}${i===2?';border:1px solid var(--line)':''}"></div>
       <div style="flex:1">
         <b>${name}</b>
-        <div class="wardrobe-item-symbol">
+        <div class="wardrobe-item-symbol" style="display:flex;align-items:center;gap:8px;margin-top:4px">
           <span class="color-symbol" style="width:28px;height:28px;font-size:16px">${symbolEmoji}</span>
           <span style="font-size:12px;color:var(--slate)">${colorName}</span>
         </div>
@@ -438,6 +412,7 @@ function renderWardrobe(){
   });
   checkHarmony();
 }
+
 function checkHarmony(){
   const box = document.getElementById('harmonyResult');
   if(selected.size < 2){ box.innerHTML=''; return; }
@@ -466,10 +441,7 @@ function toggleDark(){
 function speak(key){
   if('speechSynthesis' in window){
     let text = T[lang][key] || T[lang].color_blue;
-    // If key is cam_result_speak, use the color + symbol description
     if(key === 'cam_result_speak') {
-      const colorName = lang === 'ar' ? 'أزرق' : 'Blue';
-      const symbolDesc = lang === 'ar' ? 'قطرة الماء' : 'water drop';
       text = lang === 'ar' 
         ? `اللون المكتشف هو أزرق. رمزه قطرة الماء.` 
         : `The detected color is blue. Its symbol is a water drop.`;
